@@ -1,0 +1,227 @@
+---
+title: "Tendencias de consumo de cocteles en Colombia"
+author: "Juan Pablo Montilla"
+date: "2025-07-15"
+output:
+  pdf_document:
+    latex_engine: xelatex
+    toc: true
+    number_sections: true
+    toc_depth: 2
+    highlight: tango
+    keep_tex: true
+    fig_caption: true
+---
+
+## Introducción
+
+Este proyecto analiza las tendencias de búsqueda en Google relacionadas con cocteles en Colombia. El objetivo es identificar patrones de comportamiento, comparar el interés entre diferentes bebidas y encontrar oportunidades comerciales para negocios como mobile bars o marcas de bebidas alcohólicas.
+
+Se utilizan datos públicos extraídos con `gtrendsR`, visualizados en R y documentados para fines de análisis estratégico.
+
+---
+
+## Librerías y herramientas utilizadas
+
+```{r setup, message=FALSE, warning=FALSE}
+library(gtrendsR)
+library(ggplot2)
+library(dplyr)
+```
+
+## Consulta de tendencias por bebida
+
+``` {r bebidas}
+bebidas <- c("mojito", "gin tonic", "michelada", "coctel")
+trends_bebidas <- gtrends(keyword = bebidas, geo = "CO", time = "today 12-m", onlyInterest = TRUE)
+head(trends_bebidas$interest_over_time)
+```
+
+# Visualización de tendencias por coctel comparadas
+
+```{r viscoctel}
+if (!is.null(trends_bebidas$interest_over_time) && "hits" %in% names(trends_bebidas$interest_over_time)) {
+  ggplot(trends_bebidas$interest_over_time, aes(x = date, y = hits, color = keyword)) +
+    geom_line(size = 1) +
+    labs(title = "Tendencias de búsqueda por bebida en Colombia (últimos 12 meses)",
+         x = "Fecha", y = "Interés (0–100)", color = "Bebida") +
+    theme_minimal()
+} else {
+  message("⚠️ No se encontraron datos para bebidas.")
+}
+```
+  
+## Consulta de tendencias por perfil de sabores del coctel
+
+```{r sabores}
+sabores <- c("coctel dulce", "coctel citrico", "coctel amargo")
+trends_sabores <- gtrends(keyword = sabores, geo = "CO", time = "today 12-m", onlyInterest = TRUE)
+head(trends_sabores$interest_over_time)
+```
+
+# Visualización de tendencias por perfil de sabores
+
+```{r vissabores, message=FALSE, warning=FALSE}
+if (!is.null(trends_sabores$interest_over_time) &&
+    "hits" %in% names(trends_sabores$interest_over_time)) {
+  
+  ggplot(trends_sabores$interest_over_time, aes(x = date, y = hits, color = keyword)) +
+    geom_line(size = 1) +
+    labs(title = "Interés por perfil de sabor de cocteles en Colombia (Últimos 12 meses)",
+         x = "Fecha", y = "Interés (0–100)", color = "Sabor") +
+    theme_minimal()
+  
+} else {
+  message("⚠️ No se encontraron datos para visualizar. Verifica conexión o términos de búsqueda.")
+}
+```
+       
+# Visualización por individual
+
+``` {r visind}
+if (!is.null(data) && all(c("date", "hits", "keyword") %in% names(data))) {
+  ggplot(data, aes(x = date, y = hits)) +
+    geom_line(color = "#69b3a2", size = 1) +
+    facet_wrap(~ keyword, scales = "free_y") +
+    labs(title = "Interés por tipo de sabor de cocteles",
+         x = "Fecha", y = "Interés") +
+    theme_minimal()
+} else {
+  message("⚠️ Datos insuficientes para facet_wrap.")
+}
+```
+  
+## Consulta de tendencias por tipos de licor
+
+```{r licor}
+licores <- c("coctel con vodka", "coctel con ron", "coctel con gin", "coctel con whisky")
+trends_licores <- gtrends(keyword = licores, 
+                          geo = "CO", 
+                          time = "today 12-m", 
+                          onlyInterest = TRUE)
+head(trends_licores$interest_over_time)
+```
+# Visualización por tipo de licor
+
+```{r vislicor}
+data <- trends_licores$interest_over_time
+if (!is.null(data) && all(c("date", "hits", "keyword") %in% names(data))) {
+  ggplot(data, aes(x = date, y = hits, color = keyword)) +
+    geom_line(size = 1) +
+    labs(title = "Interés por tipo de licor en cocteles (últimos 12 meses)",
+         x = "Fecha", y = "Interés (0–100)", color = "Licor") +
+    theme_minimal()
+} else {
+  message("⚠️ No se encontraron datos válidos de licores.")
+}
+```
+  
+## Consulta por tipo de publico
+
+```{r publico}
+publico <- c("cocteles para mujeres", "cocteles para hombres", 
+             "cocteles sin alcohol", "cocteles faciles")
+trends_publico <- gtrends(keyword = publico, 
+                          geo = "CO", 
+                          time = "today 12-m", 
+                          onlyInterest = TRUE)
+head(trends_publico$interest_over_time)
+```
+
+# Visualización por tipo de publico
+
+```{r vispubli}
+data <- trends_publico$interest_over_time
+if (!is.null(data) && all(c("date", "hits", "keyword") %in% names(data))) {
+  ggplot(data, aes(x = date, y = hits, color = keyword)) +
+    geom_line(size = 1) +
+    labs(title = "Interés por tipo de coctel según público (últimos 12 meses)",
+         x = "Fecha", y = "Interés (0–100)", color = "Segmento") +
+    theme_minimal()
+} else {
+  message("⚠️ No se encontraron datos para públicos.")
+}
+```
+## Analisis en conjunto resultados de busquedas
+
+# Definir grupo
+```{r comb}
+if (!is.null(trends_sabores$interest_over_time) &&
+    !is.null(trends_licores$interest_over_time) &&
+    !is.null(trends_publico$interest_over_time)) {
+  df_combinado <- bind_rows(
+    trends_sabores$interest_over_time,
+    trends_licores$interest_over_time,
+    trends_publico$interest_over_time
+  )
+} else {
+  df_combinado <- NULL
+}
+```
+# Visualizaciones en conjunto resultado de bsuqueda
+
+```{r viscon}
+if (!is.null(df_combinado)) {
+  ggplot(df_combinado, aes(x = date, y = hits, color = keyword)) +
+    geom_line(size = 1) +
+    labs(title = "Comparación de tendencias: sabores, licores y públicos",
+         x = "Fecha", y = "Interés (0-100)", color = "Término") +
+    theme_minimal()
+}
+```
+  
+#. Analisis del promedio de busqueda del grupo
+
+```{r prom}
+if (!is.null(df_combinado)) {
+  resumen_promedios <- df_combinado %>%
+    group_by(keyword) %>%
+    summarise(promedio_interes = mean(hits, na.rm = TRUE)) %>%
+    arrange(desc(promedio_interes))}
+```
+  
+#. Visualización de promedio de busqueda
+
+```{r visprom}
+if (exists("resumen_promedios")) {
+  ggplot(resumen_promedios, aes(x = reorder(keyword, promedio_interes), y = promedio_interes, fill = keyword)) +
+    geom_col(show.legend = FALSE) +
+    coord_flip() +
+    labs(title = "Promedio de interés por término (últimos 12 meses)",
+         x = "Término de búsqueda", y = "Promedio de interés (0–100)") +
+    theme_minimal()}
+```
+  
+##. Insights estratégicos
+
+-Basado en las búsquedas en Google Trends durante los últimos 12 meses en Colombia, se pueden extraer los siguientes hallazgos:
+
+-El término “mojito” fue, desde el inicio, uno de los cocteles más buscados, con picos recurrentes de interés. Esto puede asociarse a su perfil dulce, cítrico y refrescante, lo cual coincide con preferencias estacionales y momentos de ocio.
+
+-A pesar de que términos como “coctel cítrico” o “coctel amargo” casi no registran búsquedas, sí se observa un interés marcado por “coctel dulce”, lo cual sugiere que las personas buscan sabores comunes pero los describen con términos simples.
+
+-En cuanto a licor, “coctel con vodka” superó al resto (ron, gin y whisky), lo cual lo posiciona como el licor base más buscado en Google Trends. Esto puede relacionarse con cocteles como el Moscow Mule, el Sex on the Beach o el Espresso Martini y debido a ser un licor neutro que puede presentar más opciones para combinar con otros sabores.
+
+-También se evidenció un volumen relevante en búsquedas como “cocteles para mujeres” y “cocteles sin alcohol”, lo cual abre oportunidades de segmentación por perfil del consumidor.
+-Estas tendencias sugieren que una estrategia comercial en el sector de cocteles podría enfocarse en:
+
+-Promocionar cocteles con vodka de perfil dulce y visual atractivo (ej. frutales, florales, cremosos)
+
+-Diseñar menús que incluyan versiones sin alcohol o personalizadas según el género o momento de consumo
+
+-Usar nombres simples y keywords comunes en canales digitales, campañas de pago o contenido SEO
+
+-Enfocar esfuerzos en momentos de alta estacionalidad (ej. diciembre, mitad de año, festivos)
+
+Estas decisiones pueden ser particularmente efectivas para negocios tipo mobile bar, bares pop-up o experiencias de marca en eventos, donde el diseño de producto y la lectura del consumidor son claves.
+
+## Conclusión
+Este análisis demuestra cómo los datos abiertos, como los de Google Trends, pueden usarse para entender el comportamiento del consumidor en tiempo real. Con herramientas como R y gtrendsR, es posible detectar preferencias, segmentar audiencias y tomar decisiones informadas en sectores como gastronomía, bebidas y hospitalidad.
+
+Este ejercicio integra mi experiencia previa en servicio y desarrollo de producto con mis habilidades en análisis de datos y marketing estratégico.
+
+## Autor y repositorio
+JUAN PABLO MONTILLA
+
+http://github.com/JuanPabloMon
+
