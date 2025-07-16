@@ -19,8 +19,8 @@ Este proyecto explora el comportamiento de búsqueda en Google relacionado con c
 
  ## 📎 Archivos incluidos
 
-- [`bellabeat_analysis.Rmd`](./bellabeat_analysis.Rmd): código fuente completo en R
-- [`bellabeat_project.pdf`](./bellabeat_project.pdf): informe del análisis con visualizaciones
+- 📄 [Ver análisis en PDF](./Tendencias-de-bebidas.pdf)
+- 📘 [Ver código fuente (.Rmd)](./Tendencias-de-bebidas.Rmd)
 
 ---
 
